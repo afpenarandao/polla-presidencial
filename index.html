@@ -337,7 +337,8 @@
 
     <!-- RESULTADOS -->
     <div class="mpane active" id="resTab">
-      <p class="hint">Escribe el porcentaje oficial de cada candidato a medida que salen los boletines. Se guarda solo.</p>
+      <p class="hint">La app jala los resultados oficiales sola cada minuto. Solo usa esto si quieres ponerlos a mano (desmarca el auto).</p>
+      <div class="switch"><input type="checkbox" id="autoChk" checked> <span>Auto-actualizar desde la Registraduría (recomendado)</span></div>
       <div class="frow">
         <div><label class="fl">Cepeda %</label><input class="fi num" id="rCep" type="number" step="0.01" placeholder="0.00"></div>
         <div><label class="fl">Paloma %</label><input class="fi num" id="rPal" type="number" step="0.01" placeholder="0.00"></div>
@@ -346,9 +347,8 @@
       <label class="fl">Mesas escrutadas %</label>
       <input class="fi num" id="rMesas" type="number" step="0.1" placeholder="0.0">
       <label class="switch"><input type="checkbox" id="rActivo"> Mostrar resultados como oficiales (activa el ganador)</label>
-      <div class="switch"><input type="checkbox" id="autoChk"> <span>Auto-actualizar desde la Registraduría (avanzado, requiere el archivo <span class="mono">api/resultados.js</span>)</span></div>
       <div class="btn-row">
-        <button class="btn" id="saveRes">Guardar resultados</button>
+        <button class="btn" id="saveRes">Guardar resultados a mano</button>
         <button class="btn ghost" id="clearRes">Volver a cero</button>
       </div>
     </div>
@@ -402,85 +402,17 @@
 <script>
 /* ============================================================
    DATOS SEMILLA  (SEMILLA)
-   ------------------------------------------------------------
-   Reemplaza esta lista con tus amix reales (o cárgalos desde
-   el panel ⚙︎ → Participantes y luego exporta desde "Datos").
-   Las apuestas no tienen que sumar 100.
    ============================================================ */
 const SEMILLA = {  "participantes": [
-    {
-      "nombre": "Andrés P",
-      "genero": "M",
-      "edad": 27,
-      "apuestas": {
-        "cepeda": 41,
-        "paloma": 21,
-        "abelardo": 30
-      }
-    },
-    {
-      "nombre": "Almeida",
-      "genero": "M",
-      "edad": 27,
-      "apuestas": {
-        "cepeda": 43,
-        "paloma": 15,
-        "abelardo": 28
-      }
-    },
-    {
-      "nombre": "Amarís",
-      "genero": "M",
-      "edad": 26,
-      "apuestas": {
-        "cepeda": 43,
-        "paloma": 20,
-        "abelardo": 29
-      }
-    },
-    {
-      "nombre": "Parra",
-      "genero": "M",
-      "edad": 27,
-      "apuestas": {
-        "cepeda": 46,
-        "paloma": 10,
-        "abelardo": 30
-      }
-    },
-    {
-      "nombre": "Villalba",
-      "genero": "M",
-      "edad": 28,
-      "apuestas": {
-        "cepeda": 40,
-        "paloma": 12,
-        "abelardo": 35
-      }
-    },
-    {
-      "nombre": "Juan Manuel",
-      "genero": "M",
-      "edad": 28,
-      "apuestas": {
-        "cepeda": 38,
-        "paloma": 20,
-        "abelardo": 30
-      }
-    }
+    { "nombre": "Andrés P",    "genero": "M", "edad": 27, "apuestas": { "cepeda": 41, "paloma": 21, "abelardo": 30 } },
+    { "nombre": "Almeida",     "genero": "M", "edad": 27, "apuestas": { "cepeda": 43, "paloma": 15, "abelardo": 28 } },
+    { "nombre": "Amarís",      "genero": "M", "edad": 26, "apuestas": { "cepeda": 43, "paloma": 20, "abelardo": 29 } },
+    { "nombre": "Parra",       "genero": "M", "edad": 27, "apuestas": { "cepeda": 46, "paloma": 10, "abelardo": 30 } },
+    { "nombre": "Villalba",    "genero": "M", "edad": 28, "apuestas": { "cepeda": 40, "paloma": 12, "abelardo": 35 } },
+    { "nombre": "Juan Manuel", "genero": "M", "edad": 28, "apuestas": { "cepeda": 38, "paloma": 20, "abelardo": 30 } }
   ],
-  "ponderador": {
-    "cepeda": 38,
-    "paloma": 18,
-    "abelardo": 30
-  },
-  "resultados": {
-    "cepeda": 0,
-    "paloma": 0,
-    "abelardo": 0,
-    "mesas": 0,
-    "activo": false
-  }
+  "ponderador": { "cepeda": 38, "paloma": 18, "abelardo": 30 },
+  "resultados": { "cepeda": 0, "paloma": 0, "abelardo": 0, "mesas": 0, "activo": false }
 };
 
 const CANDIDATOS = [
@@ -489,7 +421,7 @@ const CANDIDATOS = [
   {id:"abelardo", nombre:"Abelardo de la Espriella",corto:"Abelardo", color:"var(--abelardo)",hex:"#6b34c9", cls:"col-abe"}
 ];
 
-/* ---- almacenamiento tolerante (funciona aunque no haya localStorage) ---- */
+/* ---- almacenamiento tolerante ---- */
 const mem={};
 const store={
   get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},
@@ -535,7 +467,6 @@ function render(){
   document.getElementById("pcount").innerHTML = `${n}<small>Participantes</small>`;
   document.getElementById("lede").innerHTML =
     `<b>${n} ${n===1?"persona apostó":"personas apostaron"}</b> a los porcentajes de Cepeda, Paloma Valencia y Abelardo de la Espriella en primera vuelta. Gana quien tenga el menor error.`;
-
   renderLive();
   renderWinner();
   renderBets();
@@ -570,7 +501,7 @@ function renderWinner(){
     box.innerHTML = `<span class="wtag">Resultados en espera</span>
       <div class="trophy">🏆</div>
       <div class="wname">Aquí va<br>el ganador</div>
-      <div class="wsub">Aparece cuando marques los resultados como oficiales en el panel.</div>`;
+      <div class="wsub">Aparece cuando empiecen a llegar los boletines oficiales.</div>`;
     return;
   }
   const ranked=[...state.participantes].map(p=>({p,mae:maeOf(p)})).sort((a,b)=>a.mae-b.mae);
@@ -589,7 +520,7 @@ function renderBets(){
   document.getElementById("apuestasKicker").textContent = showMae? "Ranking final" : "Sin resultados aún";
   document.getElementById("apuestasDesc").textContent = showMae
     ? "Ordenados de menor a mayor error. El de arriba le pegó más."
-    : "El ranking aparece cuando marques los resultados oficiales. Por ahora, las predicciones de cada quien.";
+    : "El ranking aparece cuando lleguen los boletines oficiales. Por ahora, las predicciones de cada quien.";
   let rows=state.participantes.map((p,i)=>({p,i,mae:showMae?maeOf(p):null}));
   if(showMae) rows.sort((a,b)=>a.mae-b.mae);
   const head=`<thead><tr>
@@ -635,11 +566,9 @@ function renderCards(){
   const wait='<span class="waiting">Se actualiza con el primer boletín oficial.</span>';
   let sobre=wait, sub=wait, hm=wait, pond;
 
-  // apuesta más rara (mayor desviación del consenso)
   let rara={nombre:"—",dev:0};
   P.forEach(p=>{const d=CANDIDATOS.reduce((s,c)=>s+Math.abs(p.apuestas[c.id]-avg[c.id]),0); if(d>rara.dev)rara={nombre:p.nombre,dev:d};});
 
-  // apuestas vs ponderador
   const w=state.ponderador;
   const dists=P.map(p=>({nombre:p.nombre,d:CANDIDATOS.reduce((s,c)=>s+Math.abs(p.apuestas[c.id]-w[c.id]),0)}));
   const cerca=[...dists].sort((a,b)=>a.d-b.d)[0];
@@ -650,12 +579,11 @@ function renderCards(){
 
   if(hasResults()){
     const r=state.resultados;
-    const diffs=CANDIDATOS.map(c=>({c,d:avg[c.id]-r[c.id]})); // + = sobrestimado
+    const diffs=CANDIDATOS.map(c=>({c,d:avg[c.id]-r[c.id]}));
     const mas=[...diffs].sort((a,b)=>b.d-a.d)[0];
     const men=[...diffs].sort((a,b)=>a.d-b.d)[0];
     sobre=`<span class="big" style="color:${mas.c.color}">${mas.c.corto}</span><span class="nbody">El grupo le puso <b>${fmt(mas.d,1)} pp</b> de más.</span>`;
     sub=`<span class="big" style="color:${men.c.color}">${men.c.corto}</span><span class="nbody">El grupo le puso <b>${fmt(Math.abs(men.d),1)} pp</b> de menos.</span>`;
-    // hombres vs mujeres: menor MAE promedio
     const byG=g=>{const arr=P.filter(p=>p.genero===g);return arr.length?mean(arr.map(maeOf)):null;};
     const mF=byG("F"), mM=byG("M");
     if(mF!==null&&mM!==null){
@@ -773,6 +701,7 @@ function syncAdmin(){
 }
 
 document.getElementById("saveRes").onclick=()=>{
+  stopAuto();
   state.resultados={cepeda:+rCep.value||0,paloma:+rPal.value||0,abelardo:+rAbe.value||0,mesas:+rMesas.value||0,activo:rActivo.checked};
   save();render();syncAdmin();
 };
@@ -827,30 +756,38 @@ document.getElementById("importBtn").onclick=()=>{
 };
 document.getElementById("wipe").onclick=()=>{if(confirm("Esto borra todo y vuelve a los datos de ejemplo.")){store.del(KEY);state=JSON.parse(JSON.stringify(SEMILLA));save();render();syncAdmin();}};
 
-/* ---------------- AUTO-FETCH (opcional) ---------------- */
+/* ---------------- AUTO-FETCH (arranca solo) ---------------- */
 let autoTimer=null;
-document.getElementById("autoChk").onchange=e=>{
-  if(e.target.checked){pollResultados();autoTimer=setInterval(pollResultados,60000);}
-  else{clearInterval(autoTimer);autoTimer=null;}
-};
+function startAuto(){
+  pollResultados();
+  if(!autoTimer) autoTimer=setInterval(pollResultados,60000);
+  const chk=document.getElementById("autoChk"); if(chk) chk.checked=true;
+}
+function stopAuto(){
+  clearInterval(autoTimer); autoTimer=null;
+  const chk=document.getElementById("autoChk"); if(chk) chk.checked=false;
+}
+document.getElementById("autoChk").onchange=e=>{ e.target.checked?startAuto():stopAuto(); };
 async function pollResultados(){
   try{
     const res=await fetch("/api/resultados",{cache:"no-store"});
     if(!res.ok)throw 0;
     const d=await res.json();
-    state.resultados={cepeda:+d.cepeda||0,paloma:+d.paloma||0,abelardo:+d.abelardo||0,mesas:+d.mesas||0,activo:true};
+    const cep=+d.cepeda||0, pal=+d.paloma||0, abe=+d.abelardo||0, mesas=+d.mesas||0;
+    const hayDatos = mesas>0 || cep>0 || pal>0 || abe>0;
+    state.resultados={cepeda:cep,paloma:pal,abelardo:abe,mesas:mesas,activo:hayDatos};
     save();render();syncAdmin();
   }catch(e){
     console.warn("Auto-fetch no disponible todavía:",e);
   }
 }
 
-/* hint sutil al entrar */
 window.addEventListener("load",()=>{
   setTimeout(()=>{revealHint.style.opacity=".9";setTimeout(()=>revealHint.style.opacity="0",3500);},900);
 });
 
 render();
+startAuto();
 </script>
 </body>
 </html>
