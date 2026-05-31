@@ -408,16 +408,50 @@
    Las apuestas no tienen que sumar 100.
    ============================================================ */
 const SEMILLA = {
-  participantes: [
-    {nombre:"Andrés (ejemplo)", genero:"M", edad:31, apuestas:{cepeda:40, paloma:22, abelardo:27}},
-    {nombre:"Falla (ejemplo)",  genero:"M", edad:29, apuestas:{cepeda:44, paloma:20, abelardo:24}},
-    {nombre:"Marce (ejemplo)",  genero:"F", edad:26, apuestas:{cepeda:38, paloma:25, abelardo:29}},
-    {nombre:"Lucía (ejemplo)",  genero:"F", edad:34, apuestas:{cepeda:41, paloma:19, abelardo:31}},
-    {nombre:"Samir (ejemplo)",  genero:"M", edad:22, apuestas:{cepeda:46, paloma:23, abelardo:21}},
-    {nombre:"Dani (ejemplo)",   genero:"F", edad:45, apuestas:{cepeda:37, paloma:28, abelardo:26}}
+  "participantes": [
+    {
+      "nombre": "Andrés P",
+      "genero": "M",
+      "edad": 27,
+      "apuestas": {
+        "cepeda": 41,
+        "paloma": 21,
+        "abelardo": 30
+      }
+    },
+    {
+      "nombre": "Almeida",
+      "genero": "M",
+      "edad": 27,
+      "apuestas": {
+        "cepeda": 43,
+        "paloma": 15,
+        "abelardo": 28
+      }
+    },
+    {
+      "nombre": "Amarís",
+      "genero": "M",
+      "edad": 26,
+      "apuestas": {
+        "cepeda": 43,
+        "paloma": 20,
+        "abelardo": 29
+      }
+    }
   ],
-  ponderador: {cepeda:38, paloma:18, abelardo:30},   // <- ponderador La Silla Vacía (cámbialo cuando tengas el real)
-  resultados: {cepeda:0, paloma:0, abelardo:0, mesas:0, activo:false}
+  "ponderador": {
+    "cepeda": 38,
+    "paloma": 18,
+    "abelardo": 30
+  },
+  "resultados": {
+    "cepeda": 0,
+    "paloma": 0,
+    "abelardo": 0,
+    "mesas": 0,
+    "activo": false
+}
 };
 
 const CANDIDATOS = [
